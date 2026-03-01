@@ -4,6 +4,10 @@ import 'package:ontime/models/focus_session.dart';
 import 'package:ontime/models/restricted_app.dart';
 import 'package:ontime/providers/session_provider.dart';
 
+/// Strips seconds and milliseconds so DateTime comparisons stay clean.
+DateTime _truncateToMinute(DateTime dt) =>
+    DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute);
+
 /// A curated list of commonly distracting apps used as the default blocking menu.
 const List<RestrictedApp> _commonApps = [
   RestrictedApp(packageName: 'com.instagram.android', appName: 'Instagram'),
@@ -37,8 +41,8 @@ class _CreateSessionScreenState extends ConsumerState<CreateSessionScreen> {
   final _nameController = TextEditingController();
   final _motivationController = TextEditingController();
 
-  DateTime _startTime = DateTime.now();
-  DateTime _endTime = DateTime.now().add(const Duration(hours: 2));
+  DateTime _startTime = _truncateToMinute(DateTime.now());
+  DateTime _endTime = _truncateToMinute(DateTime.now().add(const Duration(hours: 2)));
   final Set<String> _selectedApps = {};
 
   @override
@@ -80,6 +84,16 @@ class _CreateSessionScreenState extends ConsumerState<CreateSessionScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (!_endTime.isAfter(_startTime)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('End time must be after start time.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     final session = FocusSession()
       ..name = _nameController.text.trim()

@@ -54,13 +54,23 @@ class _OnTimeAppState extends State<OnTimeApp> {
   @override
   void initState() {
     super.initState();
-    // Consume any route queued while the app was in the foreground/background.
+    // Register navigation callback for foreground notification taps.
+    NotificationService.setNavigationCallback((route) {
+      navigatorKey.currentState?.pushNamed(route);
+    });
+    // Consume any route queued while the app was launching.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final pending = NotificationService.consumePendingRoute();
       if (pending != null && pending.isNotEmpty) {
         navigatorKey.currentState?.pushNamed(pending);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    NotificationService.clearNavigationCallback();
+    super.dispose();
   }
 
   @override

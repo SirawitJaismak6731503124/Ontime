@@ -42,17 +42,33 @@ class NotificationService {
     // while the app is running in the foreground or resumed from background.
     final payload = response.payload;
     if (payload != null && payload.isNotEmpty) {
-      // Import navigatorKey from main.dart is a circular dep risk, so we use
-      // a late-bound lookup through the router instead. NavigatorKey is set
-      // on MaterialApp and provides safe navigation from outside the tree.
       _navigateTo(payload);
     }
   }
 
   static void _navigateTo(String route) {
-    // navigatorKey is defined in main.dart; accessed here via the global ref
-    // that main.dart exports so we can navigate without BuildContext.
+    // If a live navigator callback is registered (app is in foreground), use it.
+    if (_onNavigate != null) {
+      _onNavigate!(route);
+      return;
+    }
+    // Otherwise queue the route so main.dart can consume it once the app starts.
     _pendingRoute = route;
+  }
+
+  /// Optional callback set by the app to handle in-foreground notification taps.
+  static void Function(String route)? _onNavigate;
+
+  /// Register a callback to handle notification-tap navigation while the app is
+  /// running. Call this from the root widget's [initState] and clear it in
+  /// [dispose].
+  static void setNavigationCallback(void Function(String route) callback) {
+    _onNavigate = callback;
+  }
+
+  /// Clears the navigation callback (call from widget [dispose]).
+  static void clearNavigationCallback() {
+    _onNavigate = null;
   }
 
   /// Pending route set by a notification tap; consumed once in main.dart after

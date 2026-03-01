@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'dart:ui';
 
 import 'package:flutter_background_service/flutter_background_service.dart';
@@ -7,6 +8,22 @@ import 'package:isar/isar.dart';
 import 'package:ontime/models/focus_session.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:usage_stats/usage_stats.dart';
+
+/// Maps common package names to human-readable app labels.
+const Map<String, String> _packageLabels = {
+  'com.instagram.android': 'Instagram',
+  'com.twitter.android': 'X (Twitter)',
+  'com.facebook.katana': 'Facebook',
+  'com.zhiliaoapp.musically': 'TikTok',
+  'com.snapchat.android': 'Snapchat',
+  'com.google.android.youtube': 'YouTube',
+  'com.reddit.frontpage': 'Reddit',
+  'com.discord': 'Discord',
+  'com.netflix.mediaclient': 'Netflix',
+  'com.spotify.music': 'Spotify',
+  'com.google.android.gm': 'Gmail',
+  'com.whatsapp': 'WhatsApp',
+};
 
 /// Configures and registers the Flutter background service.
 /// Call this once from main() before runApp().
@@ -126,7 +143,8 @@ void onStart(ServiceInstance service) async {
         if (_lastBlockedPackage != currentPackage) {
           _lastBlockedPackage = currentPackage;
 
-          final appLabel = currentPackage.split('.').last;
+          final appLabel =
+              _packageLabels[currentPackage] ?? currentPackage.split('.').last;
 
           const androidDetails = AndroidNotificationDetails(
             'ontime_focus_channel',
@@ -151,8 +169,8 @@ void onStart(ServiceInstance service) async {
         _lastBlockedPackage = null;
       }
     } catch (e) {
-      // Log the error type so permission/API issues can be diagnosed at runtime.
-      debugPrint('[OnTime] Background poll error: ${e.runtimeType}: $e');
+      developer.log('[OnTime] Background poll error: ${e.runtimeType}: $e',
+          name: 'ontime.background');
     }
   });
 

@@ -1,1 +1,1 @@
-# Ontime
+# student-focused productivity app called OnTime. The app's purpose is to "guard" the user's focus by acting as a digital barrier when they try to open distracting apps during scheduled study sessions.

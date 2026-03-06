@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OnTime</string>
+    
+    <!-- Dashboard Screen -->
+    <string name="dashboard_title">OnTime</string>
+    <string name="no_sessions">No sessions yet</string>
+    <string name="create_first_session">Create your first focus session</string>
+    <string name="add_session">+ Add Session</string>
+    <string name="focus_session">FOCUS SESSION</string>
+    
+    <!-- Edit Session Screen -->
+    <string name="edit_session">EDIT SESSION</string>
+    <string name="time_block">TIME BLOCK</string>
+    <string name="title">TITLE</string>
+    <string name="blocked_apps">BLOCKED APPS</string>
+    <string name="reminder_message">REMINDER MESSAGE</string>
+    <string name="save_session">SAVE SESSION</string>
+    <string name="delete_session">DELETE SESSION</string>
+    
+    <!-- Reminder Screen -->
+    <string name="stay_focused">Stay Focused!</string>
+    <string name="you_tried_to_open">You tried to open:</string>
+    <string name="got_it_lets_focus">Got it! Let\'s focus</string>
+    
+    <!-- Service -->
+    <string name="ontime_is_running">OnTime is Running</string>
+    <string name="monitoring_focus_sessions">Monitoring your focus sessions...</string>
+</resources>

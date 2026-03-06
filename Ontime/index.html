@@ -319,34 +319,35 @@
 
         .time-picker-wheels {
             display: flex;
-            gap: 16px;
+            gap: 12px;
             justify-content: center;
             align-items: center;
             margin-bottom: 24px;
             padding: 0 20px;
+            position: relative;
         }
 
         .time-wheel {
             display: flex;
             flex-direction: column;
             width: 90px;
-            height: 180px;
+            height: 200px;
             position: relative;
             overflow: hidden;
-            background-color: #2A2A2A;
+            background-color: #000000;
             border-radius: 16px;
         }
 
         .time-wheel-selection {
             position: absolute;
             top: 50%;
-            left: 0;
-            right: 0;
+            left: -20px;
+            right: -20px;
             height: 60px;
-            border-top: 1px solid #555555;
-            border-bottom: 1px solid #555555;
+            border-top: 2px solid #555555;
+            border-bottom: 2px solid #555555;
             pointer-events: none;
-            background-color: rgba(255, 255, 255, 0.08);
+            background-color: rgba(255, 255, 255, 0.05);
             transform: translateY(-30px);
             z-index: 2;
         }
@@ -355,11 +356,19 @@
             display: flex;
             flex-direction: column;
             width: 100%;
-            padding: 60px 0;
+            height: 100%;
             overflow-y: scroll;
-            scroll-behavior: smooth;
+            overflow-x: hidden;
+            scroll-behavior: auto;
             scroll-snap-type: y mandatory;
             -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .time-wheel-scroller::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
         }
 
         .time-wheel-item {
@@ -367,50 +376,43 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 500;
-            color: #888888;
-            scroll-snap-align: start;
+            color: #666666;
+            scroll-snap-align: center;
             flex-shrink: 0;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease-out;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .time-wheel-item.active {
             color: #FFFFFF;
             font-weight: 700;
-            font-size: 28px;
+            font-size: 32px;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
         }
 
-        .time-wheel::-webkit-scrollbar {
-            width: 0;
-            display: none;
-        }
-
+        /* Gradient fade effect for top and bottom */
         .time-wheel::before,
         .time-wheel::after {
             content: '';
             position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 20px;
+            left: 0;
+            right: 0;
+            height: 70px;
             pointer-events: none;
-            z-index: 4;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            color: #666666;
+            z-index: 3;
         }
 
         .time-wheel::before {
-            content: '▲';
-            top: 10px;
+            top: 0;
+            background: linear-gradient(to bottom, #000000 0%, rgba(0, 0, 0, 0.8) 50%, transparent 100%);
         }
 
         .time-wheel::after {
-            content: '▼';
-            bottom: 10px;
+            bottom: 0;
+            background: linear-gradient(to top, #000000 0%, rgba(0, 0, 0, 0.8) 50%, transparent 100%);
         }
 
         .time-picker-separator {
@@ -437,17 +439,19 @@
         }
 
         .time-picker-cancel {
-            background-color: #2A2A2A;
+            background-color: #1E1E1E;
             color: #FFFFFF;
+            border: 1px solid #2A2A2A;
         }
 
         .time-picker-cancel:hover {
-            background-color: #333333;
+            background-color: #2A2A2A;
         }
 
         .time-picker-confirm {
             background-color: #FFFFFF;
             color: #000000;
+            font-weight: 700;
         }
 
         .time-picker-confirm:hover {
@@ -794,7 +798,11 @@
             initializeTimePicker();
         }
 
-        // Time Picker Functions
+        // Time Picker Functions with Infinite Scrolling
+        const ITEM_HEIGHT = 60;
+        const ITEMS_TO_SHOW = 3; // Show 3 items above and below
+        const REPEAT_COUNT = 5; // Number of times to repeat the list for infinite effect
+
         function initializeTimePicker() {
             const hoursScroller = document.getElementById('hoursScroller');
             const minutesScroller = document.getElementById('minutesScroller');
@@ -805,75 +813,250 @@
             minutesScroller.innerHTML = '';
             ampmScroller.innerHTML = '';
             
-            // Generate hours (1-12) - display with leading zeros
+            // Generate hours (1-12) with infinite scroll
+            const hours = [];
             for (let i = 1; i <= 12; i++) {
-                const div = document.createElement('div');
-                div.className = 'time-wheel-item';
-                div.textContent = String(i).padStart(2, '0');
-                div.dataset.value = i;
-                hoursScroller.appendChild(div);
+                hours.push(i);
             }
+            createInfiniteWheel(hoursScroller, hours, true);
 
-            // Generate minutes (00-59) - ALL minutes with leading zeros
+            // Generate minutes (00-59) with infinite scroll
+            const minutes = [];
             for (let i = 0; i < 60; i++) {
-                const div = document.createElement('div');
-                div.className = 'time-wheel-item';
-                div.textContent = String(i).padStart(2, '0');
-                div.dataset.value = i;
-                minutesScroller.appendChild(div);
+                minutes.push(i);
             }
+            createInfiniteWheel(minutesScroller, minutes, true);
 
-            // Generate AM/PM
-            ['AM', 'PM'].forEach((period) => {
-                const div = document.createElement('div');
-                div.className = 'time-wheel-item';
-                div.textContent = period;
-                div.dataset.value = period;
-                ampmScroller.appendChild(div);
-            });
+            // Generate AM/PM (no infinite scroll needed, just 2 items)
+            const periods = ['AM', 'PM'];
+            createInfiniteWheel(ampmScroller, periods, false);
 
-            // Add scroll listeners
-            setupWheelScrolling('hoursScroller', 'currentHour');
-            setupWheelScrolling('minutesScroller', 'currentMinute');
-            setupWheelScrolling('ampmScroller', 'currentAMPM');
+            // Add scroll listeners with infinite effect
+            setupInfiniteScrolling('hoursScroller', hours.length, 'hour');
+            setupInfiniteScrolling('minutesScroller', minutes.length, 'minute');
+            setupInfiniteScrolling('ampmScroller', periods.length, 'ampm');
         }
 
-        function setupWheelScrolling(scrollerId, type) {
+        function createInfiniteWheel(container, values, needsInfinite) {
+            const repeats = needsInfinite ? REPEAT_COUNT : 1;
+            
+            // Add padding items at the start
+            for (let i = 0; i < ITEMS_TO_SHOW; i++) {
+                const div = document.createElement('div');
+                div.className = 'time-wheel-item time-wheel-padding';
+                div.innerHTML = '&nbsp;';
+                container.appendChild(div);
+            }
+            
+            // Add the actual items (repeated if infinite)
+            for (let r = 0; r < repeats; r++) {
+                values.forEach(val => {
+                    const div = document.createElement('div');
+                    div.className = 'time-wheel-item';
+                    div.textContent = typeof val === 'number' ? String(val).padStart(2, '0') : val;
+                    div.dataset.value = val;
+                    container.appendChild(div);
+                });
+            }
+            
+            // Add padding items at the end
+            for (let i = 0; i < ITEMS_TO_SHOW; i++) {
+                const div = document.createElement('div');
+                div.className = 'time-wheel-item time-wheel-padding';
+                div.innerHTML = '&nbsp;';
+                container.appendChild(div);
+            }
+        }
+
+        function setupInfiniteScrolling(scrollerId, totalValues, type) {
             const scroller = document.getElementById(scrollerId);
-            let lastScrollTime = 0;
+            const isInfinite = totalValues > 2;
+            let isScrolling = false;
+            let isUserScrolling = false;
+            let scrollTimeout = null;
+            let momentumTimeout = null;
+            let repositionTimeout = null;
+            let canReposition = false;
 
-            scroller.addEventListener('scroll', () => {
-                const now = Date.now();
-                if (now - lastScrollTime < 50) return;
-                lastScrollTime = now;
-
-                const items = scroller.querySelectorAll('.time-wheel-item');
+            // Update active item highlighting
+            function updateActiveItem() {
+                const items = scroller.querySelectorAll('.time-wheel-item:not(.time-wheel-padding)');
+                const allItems = scroller.querySelectorAll('.time-wheel-item');
                 const scrollTop = scroller.scrollTop;
-                const itemHeight = 60;
-                const centerIndex = Math.round(scrollTop / itemHeight);
+                const centerPosition = scrollTop + (scroller.clientHeight / 2);
+                
+                let closestItem = null;
+                let minDistance = Infinity;
+                let closestIndex = -1;
 
-                items.forEach((item, index) => {
+                allItems.forEach((item, index) => {
+                    const itemTop = index * ITEM_HEIGHT + (ITEM_HEIGHT / 2);
+                    const distance = Math.abs(itemTop - centerPosition);
+                    
                     item.classList.remove('active');
-                    if (index === centerIndex) {
-                        item.classList.add('active');
-                        if (type === 'currentHour') selectedHour = parseInt(item.dataset.value || item.textContent);
-                        if (type === 'currentMinute') selectedMinute = parseInt(item.dataset.value || item.textContent);
-                        if (type === 'currentAMPM') selectedAMPM = item.dataset.value || item.textContent;
+                    
+                    if (!item.classList.contains('time-wheel-padding')) {
+                        // Fade effect based on distance from center
+                        if (distance < ITEM_HEIGHT) {
+                            const opacity = 1 - (distance / (ITEM_HEIGHT * 1.5));
+                            item.style.opacity = Math.max(0.4, Math.min(1, opacity));
+                        } else if (distance < ITEM_HEIGHT * 2) {
+                            item.style.opacity = 0.5;
+                        } else {
+                            item.style.opacity = 0.3;
+                        }
+                        
+                        // Find closest item to center
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            closestItem = item;
+                            closestIndex = index;
+                        }
                     }
                 });
-            }, { passive: true });
+                
+                // Mark closest item as active
+                if (closestItem && minDistance < ITEM_HEIGHT) {
+                    closestItem.classList.add('active');
+                    closestItem.style.opacity = 1;
+                    const value = closestItem.dataset.value;
+                    
+                    // Update selected values (only if value exists)
+                    if (value) {
+                        if (type === 'hour') {
+                            selectedHour = parseInt(value);
+                        } else if (type === 'minute') {
+                            selectedMinute = parseInt(value);
+                        } else if (type === 'ampm') {
+                            selectedAMPM = value;
+                        }
+                    }
+                }
+            }
 
-            // Snap to item on scroll end
-            let scrollTimeout;
+            // Handle infinite loop repositioning - only when not actively scrolling
+            function handleInfiniteLoop() {
+                if (!isInfinite || !canReposition || isUserScrolling) return;
+                
+                const scrollTop = scroller.scrollTop;
+                const paddingOffset = ITEMS_TO_SHOW * ITEM_HEIGHT;
+                
+                const middleSection = Math.floor(REPEAT_COUNT / 2);
+                const singleCycleHeight = totalValues * ITEM_HEIGHT;
+                const middleStart = paddingOffset + (middleSection * singleCycleHeight);
+                const middleEnd = paddingOffset + ((middleSection + 1) * singleCycleHeight);
+                
+                // Only reposition if we're far from the middle section
+                const threshold = singleCycleHeight * 1.5;
+                
+                if (scrollTop < middleStart - threshold) {
+                    const offset = scrollTop + singleCycleHeight;
+                    scroller.scrollTop = offset;
+                } else if (scrollTop > middleEnd + (threshold / 2)) {
+                    const offset = scrollTop - singleCycleHeight;
+                    scroller.scrollTop = offset;
+                }
+            }
+
+            // Smooth snap to nearest item
+            function snapToNearest() {
+                const scrollTop = scroller.scrollTop;
+                const centerPosition = scrollTop + (scroller.clientHeight / 2);
+                const nearestIndex = Math.round((centerPosition - (ITEM_HEIGHT / 2)) / ITEM_HEIGHT);
+                const targetScroll = nearestIndex * ITEM_HEIGHT;
+                
+                // Smooth scroll to target
+                scroller.style.scrollBehavior = 'smooth';
+                scroller.scrollTop = targetScroll;
+                
+                setTimeout(() => {
+                    scroller.style.scrollBehavior = 'auto';
+                    updateActiveItem();
+                    // Enable repositioning after snap is complete
+                    if (isInfinite) {
+                        clearTimeout(repositionTimeout);
+                        repositionTimeout = setTimeout(() => {
+                            canReposition = true;
+                            handleInfiniteLoop();
+                        }, 500);
+                    }
+                }, 200);
+            }
+
+            // Scroll event handler
             scroller.addEventListener('scroll', () => {
+                isScrolling = true;
+                updateActiveItem();
+                
+                // Clear existing timeouts
                 clearTimeout(scrollTimeout);
+                
+                // Disable repositioning during active scroll
+                if (isUserScrolling) {
+                    canReposition = false;
+                }
+                
+                // Set timeout to detect scroll end
                 scrollTimeout = setTimeout(() => {
-                    const scrollTop = scroller.scrollTop;
-                    const itemHeight = 60;
-                    const nearestIndex = Math.round(scrollTop / itemHeight);
-                    scroller.scrollTop = nearestIndex * itemHeight;
+                    isScrolling = false;
+                    if (isUserScrolling) {
+                        snapToNearest();
+                    }
                 }, 150);
             }, { passive: true });
+
+            // Track user interaction start
+            scroller.addEventListener('touchstart', () => {
+                isUserScrolling = true;
+                canReposition = false;
+                clearTimeout(repositionTimeout);
+            }, { passive: true });
+
+            scroller.addEventListener('mousedown', () => {
+                isUserScrolling = true;
+                canReposition = false;
+                clearTimeout(repositionTimeout);
+            }, { passive: true });
+
+            // Touch/mouse end event for better snapping
+            scroller.addEventListener('touchend', () => {
+                clearTimeout(momentumTimeout);
+                momentumTimeout = setTimeout(() => {
+                    isUserScrolling = false;
+                    if (!isScrolling) {
+                        snapToNearest();
+                    }
+                }, 50);
+            }, { passive: true });
+
+            scroller.addEventListener('mouseup', () => {
+                clearTimeout(momentumTimeout);
+                momentumTimeout = setTimeout(() => {
+                    isUserScrolling = false;
+                    if (!isScrolling) {
+                        snapToNearest();
+                    }
+                }, 50);
+            }, { passive: true });
+
+            // Initialize position to middle section
+            const paddingOffset = ITEMS_TO_SHOW * ITEM_HEIGHT;
+            if (isInfinite) {
+                const middleSection = Math.floor(REPEAT_COUNT / 2);
+                scroller.scrollTop = paddingOffset + (middleSection * totalValues * ITEM_HEIGHT);
+            } else {
+                scroller.scrollTop = paddingOffset;
+            }
+            
+            setTimeout(() => {
+                updateActiveItem();
+                // Enable repositioning after initial setup
+                if (isInfinite) {
+                    setTimeout(() => {
+                        canReposition = true;
+                    }, 1000);
+                }
+            }, 50);
         }
 
         function openTimePicker(field) {
@@ -883,12 +1066,12 @@
             
             document.getElementById('timePickerOverlay').classList.add('active');
             
-            // Scroll wheels to selected values
+            // Scroll wheels to selected values with delay for animation
             setTimeout(() => {
-                scrollWheelToValue('hoursScroller', selectedHour);
-                scrollWheelToValue('minutesScroller', selectedMinute);
-                scrollWheelToValue('ampmScroller', selectedAMPM);
-            }, 100);
+                scrollWheelToValue('hoursScroller', selectedHour, 12);
+                scrollWheelToValue('minutesScroller', selectedMinute, 60);
+                scrollWheelToValue('ampmScroller', selectedAMPM, 2);
+            }, 150);
         }
 
         function closeTimePicker() {
@@ -916,21 +1099,58 @@
             closeTimePicker();
         }
 
-        function scrollWheelToValue(scrollerId, value) {
+        function scrollWheelToValue(scrollerId, value, totalValues) {
             const scroller = document.getElementById(scrollerId);
-            const items = scroller.querySelectorAll('.time-wheel-item');
-            let targetIndex = 0;
+            const items = scroller.querySelectorAll('.time-wheel-item:not(.time-wheel-padding)');
+            const allItems = scroller.querySelectorAll('.time-wheel-item');
+            const isInfinite = totalValues > 2;
+            const paddingOffset = ITEMS_TO_SHOW * ITEM_HEIGHT;
+            
+            let targetIndex = -1;
 
-            items.forEach((item, index) => {
-                item.classList.remove('active');
-                const itemValue = item.dataset.value || item.textContent;
-                if (String(itemValue) === String(value)) {
-                    targetIndex = index;
-                    item.classList.add('active');
+            // Find the item with matching value
+            if (isInfinite) {
+                const middleSection = Math.floor(REPEAT_COUNT / 2);
+                const middleStart = ITEMS_TO_SHOW + (middleSection * totalValues);
+                
+                for (let i = middleStart; i < middleStart + totalValues; i++) {
+                    const item = allItems[i];
+                    if (item && !item.classList.contains('time-wheel-padding')) {
+                        const itemValue = item.dataset.value;
+                        if (String(itemValue) === String(value)) {
+                            targetIndex = i;
+                            break;
+                        }
+                    }
                 }
-            });
+            } else {
+                // For AM/PM (non-infinite)
+                allItems.forEach((item, index) => {
+                    if (!item.classList.contains('time-wheel-padding')) {
+                        const itemValue = item.dataset.value;
+                        if (String(itemValue) === String(value)) {
+                            targetIndex = index;
+                        }
+                    }
+                });
+            }
 
-            scroller.scrollTop = targetIndex * 60;
+            if (targetIndex >= 0) {
+                // Calculate scroll position to center the item
+                const targetScroll = targetIndex * ITEM_HEIGHT;
+                scroller.scrollTop = targetScroll;
+                
+                // Update active highlighting
+                setTimeout(() => {
+                    allItems.forEach((item, index) => {
+                        item.classList.remove('active');
+                        if (index === targetIndex) {
+                            item.classList.add('active');
+                            item.style.opacity = 1;
+                        }
+                    });
+                }, 50);
+            }
         }
 
         function parseTimeString(timeStr) {

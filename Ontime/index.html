@@ -249,8 +249,21 @@
             align-items: center;
         }
 
-        .time-input-group {
+        .time-display {
             flex: 1;
+            background-color: #2A2A2A;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            color: #FFFFFF;
+            transition: background-color 0.2s;
+        }
+
+        .time-display:hover {
+            background-color: #333333;
         }
 
         .time-dash {
@@ -258,6 +271,155 @@
             color: #FFFFFF;
             text-align: center;
             flex: 0.1;
+        }
+
+        /* Time Picker Overlay */
+        .time-picker-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+
+        .time-picker-overlay.active {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .time-picker-container {
+            background-color: #000000;
+            width: 100%;
+            border-radius: 24px 24px 0 0;
+            padding: 20px;
+            animation: slideUp 0.3s;
+        }
+
+        .time-picker-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .time-picker-wheels {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .time-wheel {
+            display: flex;
+            flex-direction: column;
+            width: 70px;
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+            background-color: #1E1E1E;
+            border-radius: 12px;
+        }
+
+        .time-wheel-selection {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 50px;
+            border-top: 1px solid #444444;
+            border-bottom: 1px solid #444444;
+            pointer-events: none;
+            background-color: rgba(255, 255, 255, 0.05);
+            transform: translateY(-25px);
+        }
+
+        .time-wheel-scroller {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            padding: 75px 0;
+            overflow-y: scroll;
+            scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
+        }
+
+        .time-wheel-item {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 500;
+            color: #666666;
+            scroll-snap-align: start;
+            flex-shrink: 0;
+        }
+
+        .time-wheel-item.active {
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .time-wheel::-webkit-scrollbar {
+            width: 0;
+        }
+
+        .time-picker-separator {
+            font-size: 24px;
+            font-weight: 600;
+            color: #FFFFFF;
+            margin: 0 4px;
+        }
+
+        .time-picker-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .time-picker-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .time-picker-cancel {
+            background-color: #2A2A2A;
+            color: #FFFFFF;
+        }
+
+        .time-picker-cancel:hover {
+            background-color: #333333;
+        }
+
+        .time-picker-confirm {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+
+        .time-picker-confirm:hover {
+            background-color: #F5F5F5;
         }
 
         .blocked-apps-list {
@@ -443,12 +605,12 @@
             <div class="time-block">
                 <div class="form-label">TIME BLOCK</div>
                 <div class="time-inputs">
-                    <div class="time-input-group">
-                        <input type="text" class="form-input" id="startTime" placeholder="05:00 PM">
+                    <div class="time-display" onclick="openTimePicker('start')">
+                        <span id="startTimeDisplay">05:00 PM</span>
                     </div>
                     <div class="time-dash">–</div>
-                    <div class="time-input-group">
-                        <input type="text" class="form-input" id="endTime" placeholder="07:00 PM">
+                    <div class="time-display" onclick="openTimePicker('end')">
+                        <span id="endTimeDisplay">07:00 PM</span>
                     </div>
                 </div>
             </div>
@@ -500,6 +662,44 @@
                 <button class="btn btn-dismiss" onclick="showDashboard()">Got it! Let's focus</button>
             </div>
         </div>
+
+        <!-- Time Picker Overlay -->
+        <div class="time-picker-overlay" id="timePickerOverlay" onclick="closeTimePickerIfClickedOutside(event)">
+            <div class="time-picker-container">
+                <div class="time-picker-header">Select Time</div>
+                
+                <div class="time-picker-wheels">
+                    <!-- Hours Wheel -->
+                    <div class="time-wheel">
+                        <div class="time-wheel-selection"></div>
+                        <div class="time-wheel-scroller" id="hoursScroller">
+                            <!-- Hours will be populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Minutes Wheel -->
+                    <div class="time-wheel">
+                        <div class="time-wheel-selection"></div>
+                        <div class="time-wheel-scroller" id="minutesScroller">
+                            <!-- Minutes will be populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- AM/PM Wheel -->
+                    <div class="time-wheel">
+                        <div class="time-wheel-selection"></div>
+                        <div class="time-wheel-scroller" id="ampmScroller">
+                            <!-- AM/PM will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="time-picker-actions">
+                    <button class="time-picker-btn time-picker-cancel" onclick="closeTimePicker()">Cancel</button>
+                    <button class="time-picker-btn time-picker-confirm" onclick="confirmTime()">Confirm</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -507,6 +707,163 @@
         let sessions = JSON.parse(localStorage.getItem('ontime_sessions')) || [];
         let currentEditingSession = null;
         let blockedApps = [];
+        
+        // Time picker state
+        let currentTimeField = null;
+        let selectedHour = 5;
+        let selectedMinute = 0;
+        let selectedAMPM = 'PM';
+        let startTime = '05:00 PM';
+        let endTime = '07:00 PM';
+
+        // Initialize
+        function init() {
+            renderDashboard();
+            initializeTimePicker();
+        }
+
+        // Time Picker Functions
+        function initializeTimePicker() {
+            // Generate hours (1-12)
+            const hoursScroller = document.getElementById('hoursScroller');
+            for (let i = 1; i <= 12; i++) {
+                const div = document.createElement('div');
+                div.className = `time-wheel-item ${i === 5 ? 'active' : ''}`;
+                div.textContent = String(i).padStart(2, '0');
+                div.onclick = (e) => e.stopPropagation();
+                hoursScroller.appendChild(div);
+            }
+
+            // Generate minutes (0-59, by 5 minute intervals)
+            const minutesScroller = document.getElementById('minutesScroller');
+            for (let i = 0; i < 60; i += 5) {
+                const div = document.createElement('div');
+                div.className = `time-wheel-item ${i === 0 ? 'active' : ''}`;
+                div.textContent = String(i).padStart(2, '0');
+                div.onclick = (e) => e.stopPropagation();
+                minutesScroller.appendChild(div);
+            }
+
+            // Generate AM/PM
+            const ampmScroller = document.getElementById('ampmScroller');
+            ['AM', 'PM'].forEach((period, index) => {
+                const div = document.createElement('div');
+                div.className = `time-wheel-item ${period === 'PM' ? 'active' : ''}`;
+                div.textContent = period;
+                div.onclick = (e) => e.stopPropagation();
+                ampmScroller.appendChild(div);
+            });
+
+            // Add scroll listeners
+            setupWheelScrolling('hoursScroller', 'currentHour');
+            setupWheelScrolling('minutesScroller', 'currentMinute');
+            setupWheelScrolling('ampmScroller', 'currentAMPM');
+        }
+
+        function setupWheelScrolling(scrollerId, type) {
+            const scroller = document.getElementById(scrollerId);
+            let lastScrollTime = 0;
+
+            scroller.addEventListener('scroll', () => {
+                const now = Date.now();
+                if (now - lastScrollTime < 50) return;
+                lastScrollTime = now;
+
+                const items = scroller.querySelectorAll('.time-wheel-item');
+                const scrollTop = scroller.scrollTop;
+                const itemHeight = 50;
+                const centerIndex = Math.round(scrollTop / itemHeight);
+
+                items.forEach((item, index) => {
+                    item.classList.remove('active');
+                    if (index === centerIndex) {
+                        item.classList.add('active');
+                        if (type === 'currentHour') selectedHour = parseInt(item.textContent) || selectedHour;
+                        if (type === 'currentMinute') selectedMinute = parseInt(item.textContent) || selectedMinute;
+                        if (type === 'currentAMPM') selectedAMPM = item.textContent;
+                    }
+                });
+            }, { passive: true });
+
+            // Snap to item on scroll end
+            let scrollTimeout;
+            scroller.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    const scrollTop = scroller.scrollTop;
+                    const itemHeight = 50;
+                    const nearestIndex = Math.round(scrollTop / itemHeight);
+                    scroller.scrollTop = nearestIndex * itemHeight;
+                }, 500);
+            }, { passive: true });
+        }
+
+        function openTimePicker(field) {
+            currentTimeField = field;
+            const timeString = field === 'start' ? startTime : endTime;
+            parseTimeString(timeString);
+            
+            document.getElementById('timePickerOverlay').classList.add('active');
+            
+            // Scroll wheels to selected values
+            setTimeout(() => {
+                scrollWheelToValue('hoursScroller', String(selectedHour).padStart(2, '0'));
+                scrollWheelToValue('minutesScroller', String(selectedMinute).padStart(2, '0'));
+                scrollWheelToValue('ampmScroller', selectedAMPM);
+            }, 100);
+        }
+
+        function closeTimePicker() {
+            document.getElementById('timePickerOverlay').classList.remove('active');
+            currentTimeField = null;
+        }
+
+        function closeTimePickerIfClickedOutside(event) {
+            if (event.target.id === 'timePickerOverlay') {
+                closeTimePicker();
+            }
+        }
+
+        function confirmTime() {
+            const timeString = formatTime(selectedHour, selectedMinute, selectedAMPM);
+            
+            if (currentTimeField === 'start') {
+                startTime = timeString;
+                document.getElementById('startTimeDisplay').textContent = timeString;
+            } else {
+                endTime = timeString;
+                document.getElementById('endTimeDisplay').textContent = timeString;
+            }
+            
+            closeTimePicker();
+        }
+
+        function scrollWheelToValue(scrollerId, value) {
+            const scroller = document.getElementById(scrollerId);
+            const items = scroller.querySelectorAll('.time-wheel-item');
+            let targetIndex = 0;
+
+            items.forEach((item, index) => {
+                if (item.textContent === value) {
+                    targetIndex = index;
+                }
+            });
+
+            scroller.scrollTop = targetIndex * 50;
+        }
+
+        function parseTimeString(timeStr) {
+            // Parse "05:00 PM" format
+            const [time, period] = timeStr.split(' ');
+            const [hours, minutes] = time.split(':');
+            selectedHour = parseInt(hours);
+            selectedMinute = parseInt(minutes);
+            selectedAMPM = period;
+        }
+
+        function formatTime(hour, minute, ampm) {
+            return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')} ${ampm}`;
+        }
 
         // Initialize
         function init() {
@@ -558,15 +915,19 @@
 
             if (index !== null) {
                 const session = sessions[index];
-                document.getElementById('startTime').value = session.startTime;
-                document.getElementById('endTime').value = session.endTime;
+                startTime = session.startTime;
+                endTime = session.endTime;
+                document.getElementById('startTimeDisplay').textContent = session.startTime;
+                document.getElementById('endTimeDisplay').textContent = session.endTime;
                 document.getElementById('sessionTitle').value = session.title;
                 document.getElementById('reminderMessage').value = session.reminderMessage;
                 blockedApps = [...session.blockedApps];
                 document.getElementById('deleteBtn').style.display = 'block';
             } else {
-                document.getElementById('startTime').value = '';
-                document.getElementById('endTime').value = '';
+                startTime = '05:00 PM';
+                endTime = '07:00 PM';
+                document.getElementById('startTimeDisplay').textContent = '05:00 PM';
+                document.getElementById('endTimeDisplay').textContent = '07:00 PM';
                 document.getElementById('sessionTitle').value = '';
                 document.getElementById('reminderMessage').value = '';
                 document.getElementById('deleteBtn').style.display = 'none';
@@ -608,8 +969,6 @@
 
         // Save/Delete
         function saveSession() {
-            const startTime = document.getElementById('startTime').value.trim();
-            const endTime = document.getElementById('endTime').value.trim();
             const title = document.getElementById('sessionTitle').value.trim();
             const reminderMessage = document.getElementById('reminderMessage').value.trim();
 

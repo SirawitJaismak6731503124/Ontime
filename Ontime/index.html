@@ -1253,12 +1253,11 @@
                     <div class="session-label">FOCUS SESSION</div>
                     <div class="session-time">${session.startTime} – ${session.endTime}</div>
                     <div class="session-title">${session.title}</div>
-                    ${session.blockedApps.length > 0 ? `
+                    ${Array.isArray(session.blockedApps) && session.blockedApps.length > 0 ? `
                         <div class="session-apps">
-                            ${session.blockedApps.slice(0, 2).map(app => `
+                            ${session.blockedApps.map(app => `
                                 <div class="app-chip">${app}</div>
                             `).join('')}
-                            ${session.blockedApps.length > 2 ? `<div class="app-chip">+${session.blockedApps.length - 2}</div>` : ''}
                         </div>
                     ` : ''}
                 </div>
@@ -1279,6 +1278,7 @@
         function showEditScreen(index = null) {
             currentEditingSession = index;
             blockedApps = [];
+            document.getElementById('newAppInput').value = '';
 
             if (index !== null) {
                 const session = sessions[index];
@@ -1336,6 +1336,14 @@
 
         // Save/Delete
         function saveSession() {
+            // Include any app still typed in the input before saving.
+            const pendingAppInput = document.getElementById('newAppInput');
+            const pendingApp = pendingAppInput.value.trim();
+            if (pendingApp && !blockedApps.includes(pendingApp)) {
+                blockedApps.push(pendingApp);
+                pendingAppInput.value = '';
+            }
+
             const title = document.getElementById('sessionTitle').value.trim();
             const reminderMessage = document.getElementById('reminderMessage').value.trim();
 
@@ -1358,7 +1366,7 @@
                 title,
                 startTime,
                 endTime,
-                blockedApps,
+                blockedApps: [...blockedApps],
                 reminderMessage
             };
 

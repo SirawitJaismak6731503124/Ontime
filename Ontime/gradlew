@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec java -version 2>&1 | grep -q "version" && echo "Java is available" || echo "Java not found"

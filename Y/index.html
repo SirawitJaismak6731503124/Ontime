@@ -611,22 +611,22 @@
             <div class="session-list" id="sessionList">
                 <div class="empty-state" id="emptyState">
                     <div class="empty-text">No sessions yet</div>
-                    <div class="empty-subtext">Create your first focus session</div>
+                    <div class="empty-subtext">Create your first focus activity</div>
                 </div>
             </div>
 
-            <button class="btn btn-add" onclick="showEditScreen()">+ Add Session</button>
+            <button class="btn btn-add" onclick="showEditScreen()">+ Add Activity</button>
         </div>
 
         <!-- Edit Session Screen -->
         <div class="screen" id="editScreen">
             <div class="edit-header">
                 <button class="btn-back" onclick="showDashboard()">←</button>
-                <div class="edit-title">EDIT SESSION</div>
+                <div class="edit-title">EDIT ACTIVITY</div>
             </div>
 
             <div class="time-block">
-                <div class="form-label">TIME BLOCK</div>
+                <div class="form-label">TIME</div>
                 <div class="time-inputs">
                     <div class="time-display" onclick="openTimePicker('start')">
                         <span id="startTimeDisplay">05:00 PM</span>
@@ -644,10 +644,10 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">SESSION</label>
+                <label class="form-label">ACTIVITY</label>
                 <div class="session-toggle-row">
-                    <button class="session-toggle-btn" id="sessionOnBtn" onclick="setSessionActive(true)">SESSION ON</button>
-                    <button class="session-toggle-btn off" id="sessionOffBtn" onclick="setSessionActive(false)">SESSION OFF</button>
+                    <button class="session-toggle-btn" id="sessionOnBtn" onclick="setSessionActive(true)">ACTIVE</button>
+                    <button class="session-toggle-btn off" id="sessionOffBtn" onclick="setSessionActive(false)">INACTIVE</button>
                 </div>
             </div>
 
@@ -657,7 +657,7 @@
             </div>
 
             <div class="button-row">
-                <button class="btn btn-save" onclick="saveSession()">SAVE SESSION</button>
+                <button class="btn btn-save" onclick="saveSession()">SAVE ACTIVITY</button>
                 <button class="btn btn-delete" id="deleteBtn" style="display: none;" onclick="deleteSession()">DELETE</button>
             </div>
         </div>
@@ -675,7 +675,7 @@
                 </div>
 
                 <div class="session-info">
-                    <div class="session-info-title" id="reminderSessionTitle">Focus Session: Doing Homework</div>
+                    <div class="session-info-title" id="reminderSessionTitle">Focus Activity: Doing Homework</div>
                     <div class="session-info-time" id="reminderSessionTime">05:00 PM - 07:00 PM</div>
                 </div>
 
@@ -1164,10 +1164,10 @@
 
             sessionList.innerHTML = sessions.map((session, index) => `
                 <div class="session-card" onclick="editSession(${index})">
-                    <div class="session-label">FOCUS SESSION</div>
+                    <div class="session-label">FOCUS ACTIVITY</div>
                     <div class="session-time">${session.startTime} – ${session.endTime}</div>
                     <div class="session-title">${session.title}</div>
-                    <div class="session-note">${session.isActive === false ? 'Session Off' : 'Session On'}</div>
+                    <div class="session-note">${session.isActive === false ? 'Inactive' : 'Active'}</div>
                 </div>
             `).join('');
         }
@@ -1272,7 +1272,7 @@
         }
 
         function deleteSession() {
-            if (currentEditingSession !== null && confirm('Delete this session?')) {
+            if (currentEditingSession !== null && confirm('Delete this activity?')) {
                 sessions.splice(currentEditingSession, 1);
                 localStorage.setItem('ontime_sessions', JSON.stringify(sessions));
                 showDashboard();
@@ -1283,7 +1283,7 @@
         function showReminder(sessionIndex) {
             const session = sessions[sessionIndex];
             document.getElementById('reminderMessageDisplay').textContent = session.reminderMessage;
-            document.getElementById('reminderSessionTitle').textContent = `Focus Session: ${session.title}`;
+            document.getElementById('reminderSessionTitle').textContent = `Focus Activity: ${session.title}`;
             document.getElementById('reminderSessionTime').textContent = `${session.startTime} - ${session.endTime}`;
             showScreen('reminderScreen');
         }

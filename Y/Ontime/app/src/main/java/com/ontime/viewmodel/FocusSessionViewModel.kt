@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.ontime.data.local.FocusSessionDao
 import com.ontime.data.model.FocusSession
-import com.ontime.data.remote.FirebaseRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,8 +14,7 @@ import kotlinx.coroutines.launch
  * ViewModel for managing focus sessions
  */
 class FocusSessionViewModel(
-    private val dao: FocusSessionDao,
-    private val firebaseRepository: FirebaseRepository
+    private val dao: FocusSessionDao
 ) : ViewModel() {
     
     private val _allSessions = MutableStateFlow<List<FocusSession>>(emptyList())
@@ -46,10 +44,7 @@ class FocusSessionViewModel(
     fun createSession(
         title: String,
         description: String,
-        startTime: String,
-        endTime: String,
-        blockedApps: List<String>,
-        reminderMessage: String
+        time: String
     ) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -57,14 +52,9 @@ class FocusSessionViewModel(
                 val session = FocusSession(
                     title = title,
                     description = description,
-                    startTime = startTime,
-                    endTime = endTime,
-                    blockedApps = blockedApps,
-                    reminderMessage = reminderMessage
+                    time = time
                 )
                 dao.insert(session)
-                // Sync to Firebase
-                firebaseRepository.syncSessionToFirebase(session)
                 _errorMessage.value = ""
             } catch (e: Exception) {
                 _errorMessage.value = "Error creating session: ${e.message}"
@@ -84,7 +74,6 @@ class FocusSessionViewModel(
                 } else {
                     dao.update(session)
                 }
-                firebaseRepository.syncSessionToFirebase(session)
                 _errorMessage.value = ""
             } catch (e: Exception) {
                 _errorMessage.value = "Error saving session: ${e.message}"
@@ -99,7 +88,6 @@ class FocusSessionViewModel(
             _isLoading.value = true
             try {
                 dao.update(session)
-                firebaseRepository.syncSessionToFirebase(session)
                 _errorMessage.value = ""
             } catch (e: Exception) {
                 _errorMessage.value = "Error updating session: ${e.message}"
@@ -114,7 +102,6 @@ class FocusSessionViewModel(
             _isLoading.value = true
             try {
                 dao.delete(session)
-                firebaseRepository.deleteSessionFromFirebase(session.id)
                 _errorMessage.value = ""
             } catch (e: Exception) {
                 _errorMessage.value = "Error deleting session: ${e.message}"
@@ -127,10 +114,6 @@ class FocusSessionViewModel(
     fun setCurrentSession(session: FocusSession) {
         _currentSession.value = session
     }
-
-    fun updateCurrentSessionBlockedApps(blockedApps: List<String>) {
-        _currentSession.value = _currentSession.value?.copy(blockedApps = blockedApps)
-    }
     
     fun clearCurrentSession() {
         _currentSession.value = null
@@ -138,14 +121,13 @@ class FocusSessionViewModel(
 }
 
 class FocusSessionViewModelFactory(
-    private val dao: FocusSessionDao,
-    private val firebaseRepository: FirebaseRepository
+    private val dao: FocusSessionDao
 ) : ViewModelProvider.Factory {
     
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(FocusSessionViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return FocusSessionViewModel(dao, firebaseRepository) as T
+            return FocusSessionViewModel(dao) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

@@ -38,6 +38,6 @@ interface FocusSessionDao {
     @Query("DELETE FROM focus_sessions")
     suspend fun deleteAllSessions()
     
-    @Query("SELECT * FROM focus_sessions WHERE startTime <= :currentTime AND endTime >= :currentTime")
+    @Query("SELECT * FROM focus_sessions WHERE time = :currentTime")
     fun getSessionsForTime(currentTime: String): Flow<List<FocusSession>>
 }

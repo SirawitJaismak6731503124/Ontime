@@ -23,8 +23,7 @@ import com.ontime.ui.theme.HighlightWhite
 import com.ontime.ui.theme.WhiteText
 
 /**
- * Full-screen reminder view shown when user opens the app from notification
- * Displays motivational message and blocked app information
+ * Full-screen reminder view shown when user opens the app from notification.
  */
 @Composable
 fun ReminderScreen(
@@ -54,29 +53,17 @@ fun ReminderScreen(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
             
-            // Blocked App Warning
-            Column(
-                modifier = Modifier.padding(bottom = 32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "You tried to open:",
-                    fontSize = 14.sp,
-                    color = com.ontime.ui.theme.LightGrey,
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-                Text(
-                    text = session.blockedApps.joinToString(", "),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = WhiteText
-                )
-            }
+            Text(
+                text = session.time,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = WhiteText
+            )
         }
         
         // Reminder Message
         Text(
-            text = session.reminderMessage,
+            text = session.description,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = WhiteText,
@@ -101,7 +88,7 @@ fun ReminderScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             Text(
-                text = "${session.startTime} - ${session.endTime}",
+                text = session.time,
                 fontSize = 12.sp,
                 color = com.ontime.ui.theme.LightGrey
             )

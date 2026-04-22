@@ -25,11 +25,8 @@ import com.ontime.ui.theme.WhiteText
 
 @Composable
 fun PermissionGateScreen(
-    usageAccessGranted: Boolean,
     notificationsGranted: Boolean,
-    onGrantUsageAccess: () -> Unit,
-    onGrantNotifications: () -> Unit,
-    onOpenBatteryOptimization: () -> Unit
+    onGrantNotifications: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -41,33 +38,17 @@ fun PermissionGateScreen(
     ) {
         Text(text = "OnTime setup", color = WhiteText, fontSize = 24.sp)
         Text(
-            text = "The app needs usage access to detect selected apps and notification permission to show reminders.",
+            text = "The app needs notification permission to show activity reminders.",
             color = LightGrey,
             fontSize = 14.sp
         )
 
         PermissionCard(
-            title = "1. Usage access",
-            body = if (usageAccessGranted) "Granted" else "Required to monitor the foreground app.",
-            buttonText = if (usageAccessGranted) "Granted" else "Open settings",
-            enabled = !usageAccessGranted,
-            onClick = onGrantUsageAccess
-        )
-
-        PermissionCard(
-            title = "2. Notifications",
+            title = "Notifications",
             body = if (notificationsGranted) "Granted" else "Required to show reminder notifications.",
             buttonText = if (notificationsGranted) "Granted" else "Allow notifications",
             enabled = !notificationsGranted,
             onClick = onGrantNotifications
-        )
-
-        PermissionCard(
-            title = "3. Battery optimization",
-            body = "Optional but recommended so the foreground service stays alive.",
-            buttonText = "Open battery settings",
-            enabled = true,
-            onClick = onOpenBatteryOptimization
         )
     }
 }

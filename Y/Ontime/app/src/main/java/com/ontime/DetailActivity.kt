@@ -67,30 +67,10 @@ class DetailActivity : ComponentActivity() {
                     }
 
                     Text(
-                        text = "Triggered by: ${reminderPayload.triggerPackage.ifBlank { "unknown app" }}",
+                        text = "Scheduled at: ${reminderPayload.time}",
                         color = LightGrey,
                         fontSize = 13.sp
                     )
-                    Text(
-                        text = "Schedule: ${reminderPayload.startTime} - ${reminderPayload.endTime}",
-                        color = LightGrey,
-                        fontSize = 13.sp
-                    )
-
-                    if (reminderPayload.blockedApps.isNotEmpty()) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = DarkGrey),
-                            shape = RoundedCornerShape(20.dp)
-                        ) {
-                            Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text(text = "Selected apps", color = WhiteText, fontSize = 16.sp)
-                                reminderPayload.blockedApps.forEach { app ->
-                                    Text(text = app, color = LightGrey, fontSize = 13.sp)
-                                }
-                            }
-                        }
-                    }
 
                     Button(
                         onClick = { finish() },
@@ -116,10 +96,7 @@ class DetailActivity : ComponentActivity() {
             sessionId = intent.getStringExtra(ReminderContract.EXTRA_SESSION_ID).orEmpty(),
             title = intent.getStringExtra(ReminderContract.EXTRA_SESSION_TITLE).orEmpty(),
             description = intent.getStringExtra(ReminderContract.EXTRA_SESSION_DESCRIPTION).orEmpty(),
-            startTime = intent.getStringExtra(ReminderContract.EXTRA_SESSION_START_TIME).orEmpty(),
-            endTime = intent.getStringExtra(ReminderContract.EXTRA_SESSION_END_TIME).orEmpty(),
-            triggerPackage = intent.getStringExtra(ReminderContract.EXTRA_TRIGGER_PACKAGE).orEmpty(),
-            blockedApps = intent.getStringArrayExtra(ReminderContract.EXTRA_BLOCKED_APPS)?.toList().orEmpty(),
+            time = intent.getStringExtra(ReminderContract.EXTRA_SESSION_TIME).orEmpty(),
             notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
         )
     }
@@ -134,14 +111,11 @@ class DetailActivity : ComponentActivity() {
         val sessionId: String,
         val title: String,
         val description: String,
-        val startTime: String,
-        val endTime: String,
-        val triggerPackage: String,
-        val blockedApps: List<String>,
+        val time: String,
         val notificationId: Int
     ) {
         companion object {
-            fun empty(): ReminderPayload = ReminderPayload("", "Activity reminder", "", "", "", "", emptyList(), -1)
+            fun empty(): ReminderPayload = ReminderPayload("", "Activity reminder", "", "", -1)
         }
     }
 

@@ -1,6 +1,5 @@
 package com.ontime.util
 
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 import java.time.format.DateTimeParseException
@@ -29,36 +28,11 @@ object TimeUtils {
 
         return inputFormatters.firstNotNullOfOrNull { formatter ->
             try {
-                val parsedTime = LocalTime.parse(trimmedValue.uppercase(Locale.US), formatter)
+                val parsedTime = java.time.LocalTime.parse(trimmedValue.uppercase(Locale.US), formatter)
                 parsedTime.format(outputFormatter)
             } catch (_: DateTimeParseException) {
                 null
             }
-        }
-    }
-
-    fun normalizeSessionTimes(startTime: String, endTime: String): Pair<String, String>? {
-        val normalizedStart = normalizeTimeInput(startTime) ?: return null
-        val normalizedEnd = normalizeTimeInput(endTime) ?: return null
-        return normalizedStart to normalizedEnd
-    }
-
-    fun isCurrentTimeWithinRange(currentTime: LocalTime, startTimeText: String, endTimeText: String): Boolean {
-        val normalizedStart = normalizeTimeInput(startTimeText) ?: return false
-        val normalizedEnd = normalizeTimeInput(endTimeText) ?: return false
-        val startTime = LocalTime.parse(normalizedStart, outputFormatter)
-        val endTime = LocalTime.parse(normalizedEnd, outputFormatter)
-
-        return isCurrentTimeWithinRange(currentTime, startTime, endTime)
-    }
-
-    fun isCurrentTimeWithinRange(currentTime: LocalTime, startTime: LocalTime, endTime: LocalTime): Boolean {
-        return if (startTime == endTime) {
-            true
-        } else if (startTime.isBefore(endTime)) {
-            !currentTime.isBefore(startTime) && !currentTime.isAfter(endTime)
-        } else {
-            !currentTime.isBefore(startTime) || !currentTime.isAfter(endTime)
         }
     }
 }

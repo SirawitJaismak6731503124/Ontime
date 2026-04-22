@@ -3,11 +3,11 @@ package com.ontime.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,10 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,14 +45,11 @@ fun EditSessionScreen(
     session: FocusSession,
     onSave: (FocusSession) -> Unit,
     onDelete: (FocusSession) -> Unit,
-    onBack: () -> Unit,
-    onPickApps: () -> Unit
+    onBack: () -> Unit
 ) {
     var title by remember(session.id) { mutableStateOf(session.title) }
     var description by remember(session.id) { mutableStateOf(session.description) }
-    var startTime by remember(session.id) { mutableStateOf(session.startTime) }
-    var endTime by remember(session.id) { mutableStateOf(session.endTime) }
-    var reminderMessage by remember(session.id) { mutableStateOf(session.reminderMessage) }
+    var time by remember(session.id) { mutableStateOf(session.time) }
     var validationError by remember(session.id) { mutableStateOf<String?>(null) }
 
     Column(
@@ -103,76 +97,15 @@ fun EditSessionScreen(
             colors = CardDefaults.cardColors(containerColor = DarkGrey),
             shape = RoundedCornerShape(24.dp)
         ) {
-            Row(
+            TimeField(
+                label = "TIME",
+                value = time,
+                onValueChange = { time = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                TimeField(
-                    label = "Start",
-                    value = startTime,
-                    onValueChange = { startTime = it },
-                    modifier = Modifier.weight(1f)
-                )
-                Text(
-                    text = "–",
-                    fontSize = 24.sp,
-                    color = WhiteText,
-                    modifier = Modifier.weight(0.1f),
-                    textAlign = TextAlign.Center
-                )
-                TimeField(
-                    label = "End",
-                    value = endTime,
-                    onValueChange = { endTime = it },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-                text = "SELECTED APPS",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = LightGrey
+                    .padding(16.dp)
             )
-            if (session.blockedApps.isEmpty()) {
-                Text(text = "No apps selected yet", fontSize = 14.sp, color = LightGrey)
-            } else {
-                session.blockedApps.forEach { appPackage ->
-                    Text(
-                        text = appPackage,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(SurfaceGrey)
-                            .padding(12.dp),
-                        color = WhiteText,
-                        fontSize = 14.sp
-                    )
-                }
-            }
-
-            Button(
-                onClick = onPickApps,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = HighlightWhite)
-            ) {
-                Text(text = "Choose apps", color = DeepBlack, fontWeight = FontWeight.Bold)
-            }
         }
-
-        FieldCard(
-            label = "NOTIFICATION MESSAGE",
-            value = reminderMessage,
-            onValueChange = { reminderMessage = it },
-            placeholder = "Short notification text",
-            singleLine = false,
-            height = 120.dp
-        )
 
         validationError?.let {
             Text(text = it, color = ErrorRed, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
@@ -184,21 +117,18 @@ fun EditSessionScreen(
         ) {
             Button(
                 onClick = {
-                    val normalizedTimes = TimeUtils.normalizeSessionTimes(startTime, endTime)
+                    val normalizedTime = TimeUtils.normalizeTimeInput(time)
                     when {
                         title.isBlank() -> validationError = "Please enter a title."
                         description.isBlank() -> validationError = "Please enter a description."
-                        normalizedTimes == null -> validationError = "Use a valid time format like 09:00 or 9:00 AM."
-                        session.blockedApps.isEmpty() -> validationError = "Select at least one app."
+                        normalizedTime == null -> validationError = "Use a valid time format like 09:00 or 9:00 AM."
                         else -> {
                             validationError = null
                             onSave(
                                 session.copy(
                                     title = title.trim(),
                                     description = description.trim(),
-                                    startTime = normalizedTimes.first,
-                                    endTime = normalizedTimes.second,
-                                    reminderMessage = reminderMessage.trim()
+                                    time = normalizedTime
                                 )
                             )
                         }

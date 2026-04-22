@@ -45,6 +45,7 @@ class FocusSessionViewModel(
     
     fun createSession(
         title: String,
+        description: String,
         startTime: String,
         endTime: String,
         blockedApps: List<String>,
@@ -55,6 +56,7 @@ class FocusSessionViewModel(
             try {
                 val session = FocusSession(
                     title = title,
+                    description = description,
                     startTime = startTime,
                     endTime = endTime,
                     blockedApps = blockedApps,
@@ -66,6 +68,26 @@ class FocusSessionViewModel(
                 _errorMessage.value = ""
             } catch (e: Exception) {
                 _errorMessage.value = "Error creating session: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun saveSession(session: FocusSession) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val existingSession = dao.getSessionById(session.id)
+                if (existingSession == null) {
+                    dao.insert(session)
+                } else {
+                    dao.update(session)
+                }
+                firebaseRepository.syncSessionToFirebase(session)
+                _errorMessage.value = ""
+            } catch (e: Exception) {
+                _errorMessage.value = "Error saving session: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
@@ -104,6 +126,10 @@ class FocusSessionViewModel(
     
     fun setCurrentSession(session: FocusSession) {
         _currentSession.value = session
+    }
+
+    fun updateCurrentSessionBlockedApps(blockedApps: List<String>) {
+        _currentSession.value = _currentSession.value?.copy(blockedApps = blockedApps)
     }
     
     fun clearCurrentSession() {

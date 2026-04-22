@@ -12,7 +12,7 @@ import com.ontime.data.model.FocusSession
  */
 @Database(
     entities = [FocusSession::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -30,7 +30,9 @@ abstract class OnTimeDatabase : RoomDatabase() {
                     context.applicationContext,
                     OnTimeDatabase::class.java,
                     "ontime_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }

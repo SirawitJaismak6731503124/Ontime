@@ -20,6 +20,7 @@ data class FocusSession(
     @PrimaryKey
     val id: String = System.currentTimeMillis().toString(),
     val title: String,
+    val description: String = "",
     val startTime: String, // Format: "HH:mm" or full LocalDateTime string
     val endTime: String,   // Format: "HH:mm" or full LocalDateTime string
     val blockedApps: List<String> = emptyList(),

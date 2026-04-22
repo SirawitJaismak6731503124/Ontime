@@ -31,6 +31,9 @@ interface FocusSessionDao {
     
     @Query("SELECT * FROM focus_sessions WHERE isActive = 1")
     fun getActiveSessions(): Flow<List<FocusSession>>
+
+    @Query("SELECT * FROM focus_sessions WHERE isActive = 1")
+    suspend fun getActiveSessionsOnce(): List<FocusSession>
     
     @Query("DELETE FROM focus_sessions")
     suspend fun deleteAllSessions()

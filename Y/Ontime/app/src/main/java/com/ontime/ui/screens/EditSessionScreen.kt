@@ -50,6 +50,7 @@ fun EditSessionScreen(
     var title by remember(session.id) { mutableStateOf(session.title) }
     var description by remember(session.id) { mutableStateOf(session.description) }
     var time by remember(session.id) { mutableStateOf(session.time) }
+    var isActive by remember(session.id) { mutableStateOf(session.isActive) }
     var validationError by remember(session.id) { mutableStateOf<String?>(null) }
 
     Column(
@@ -107,6 +108,53 @@ fun EditSessionScreen(
             )
         }
 
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = DarkGrey),
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(text = "SESSION", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = LightGrey)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Button(
+                        onClick = { isActive = true },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isActive) HighlightWhite else SurfaceGrey
+                        )
+                    ) {
+                        Text(
+                            text = "Session On",
+                            color = if (isActive) DeepBlack else WhiteText,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Button(
+                        onClick = { isActive = false },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (!isActive) ErrorRed else SurfaceGrey
+                        )
+                    ) {
+                        Text(
+                            text = "Session Off",
+                            color = WhiteText,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+
         validationError?.let {
             Text(text = it, color = ErrorRed, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
         }
@@ -128,7 +176,8 @@ fun EditSessionScreen(
                                 session.copy(
                                     title = title.trim(),
                                     description = description.trim(),
-                                    time = normalizedTime
+                                    time = normalizedTime,
+                                    isActive = isActive
                                 )
                             )
                         }

@@ -31,7 +31,7 @@ This document summarizes what has been implemented for the OnTime student produc
 - [x] **FocusSession.kt**
   - Room entity with all required fields
   - Firebase Timestamp support
-  - Package name list for blocked apps
+  - Package name list for scheduled activities
   - Reminder message field
 
 ### Local Database (Room) ✅
@@ -85,7 +85,7 @@ This document summarizes what has been implemented for the OnTime student produc
   - Session cards with:
     - Time range display (HH:MM - HH:MM)
     - Session title
-    - Blocked apps as chips
+    - Scheduled activities as chips
     - Click to edit
   - Empty state message
   - "+ Add Session" button (outlined, rounded corners)
@@ -96,7 +96,7 @@ This document summarizes what has been implemented for the OnTime student produc
   - Back button with custom styling
   - Time block input fields
   - Title input field
-  - Blocked apps management
+  - Scheduled activities management
     - List of added apps
     - Delete (X) button for each app
     - Input field for new app names
@@ -110,7 +110,7 @@ This document summarizes what has been implemented for the OnTime student produc
   - Full-screen display
   - Large motivational message (24sp bold)
   - "Stay Focused!" header
-  - Blocked app name display
+  - Scheduled activity name display
   - Session info (title, time)
   - "Got it! Let's focus" button
   - Dark background theme
@@ -226,7 +226,7 @@ This document summarizes what has been implemented for the OnTime student produc
 - [x] Session cards with time, title, apps
 - [x] Rounded corners (24dp)
 - [x] Dark grey cards on black background
-- [x] Chip components for blocked apps
+- [x] Chip components for scheduled activities
 - [x] Empty state message
 - [x] "+ Add Session" button
 - [x] Click session to edit
@@ -234,7 +234,7 @@ This document summarizes what has been implemented for the OnTime student produc
 ### Edit Session Features ✅
 - [x] Time block input (start/end)
 - [x] Session title input
-- [x] Blocked apps list
+- [x] Scheduled activities list
 - [x] Add app functionality (+button)
 - [x] Remove app functionality (X button)
 - [x] Reminder message text area
@@ -244,7 +244,7 @@ This document summarizes what has been implemented for the OnTime student produc
 ### Reminder Features ✅
 - [x] Full-screen display
 - [x] Large bold message display
-- [x] Blocked app indication
+- [x] Scheduled activity indication
 - [x] Session info display
 - [x] Dismiss button
 - [x] Dark theme styling
@@ -254,7 +254,7 @@ This document summarizes what has been implemented for the OnTime student produc
 - [x] 1-second check interval
 - [x] App usage stats integration
 - [x] Session time validation
-- [x] Blocked app matching
+- [x] Scheduled activity matching
 - [x] Notification creation
 - [x] High priority notification
 - [x] Heads-up display
@@ -357,7 +357,7 @@ The app is now ready for:
 
 5. **Test Features**
    - Create focus session
-   - Open blocked app
+   - Open scheduled activity
    - See notification
    - Verify Firestore sync
 

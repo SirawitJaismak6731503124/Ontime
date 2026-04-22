@@ -53,7 +53,7 @@ export JAVA_HOME=/path/to/openjdk11
 ### Runtime Issues
 
 #### ❌ "Service not monitoring apps"
-**Symptoms:** No notifications when opening blocked apps
+**Symptoms:** No notifications when opening scheduled activities
 
 **Solutions:**
 1. **Enable Usage Stats Permission**
@@ -72,7 +72,7 @@ export JAVA_HOME=/path/to/openjdk11
    - Check system time is correct
 
 4. **Check Blocked Apps List**
-   - Session must have apps in blockedApps list
+   - Session must have apps in activityList list
    - Package names must be exact
 
 #### ❌ "Notification never appears"

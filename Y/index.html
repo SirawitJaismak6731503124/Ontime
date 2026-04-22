@@ -91,19 +91,11 @@
             margin-bottom: 12px;
         }
 
-        .session-apps {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .app-chip {
-            background-color: #333333;
+        .session-note {
             color: #999999;
-            padding: 6px 12px;
-            border-radius: 12px;
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 600;
+            text-transform: uppercase;
         }
 
         .empty-state {
@@ -459,64 +451,31 @@
             background-color: #F5F5F5;
         }
 
-        .blocked-apps-list {
-            margin-bottom: 16px;
-        }
-
-        .app-item {
-            background-color: #2A2A2A;
-            border-radius: 12px;
-            padding: 12px;
+        .session-toggle-row {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
+            gap: 12px;
         }
 
-        .app-name {
-            color: #FFFFFF;
-            font-size: 14px;
-        }
-
-        .app-delete-btn {
-            background: none;
-            border: none;
-            color: #FF5252;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .app-add-row {
-            display: flex;
-            gap: 8px;
-            background-color: #2A2A2A;
-            border-radius: 12px;
-            padding: 4px;
-        }
-
-        .app-add-row input {
+        .session-toggle-btn {
             flex: 1;
-            background: none;
+            padding: 14px;
             border: none;
-            color: #FFFFFF;
-            padding: 8px;
-        }
-
-        .app-add-row input::placeholder {
-            color: #999999;
-        }
-
-        .app-add-row input:focus {
-            outline: none;
-        }
-
-        .app-add-btn {
-            background: none;
-            border: none;
-            color: #FFFFFF;
-            font-size: 20px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
-            padding: 8px 12px;
+            background-color: #2A2A2A;
+            color: #FFFFFF;
+        }
+
+        .session-toggle-btn.active {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+
+        .session-toggle-btn.off.active {
+            background-color: #FF5252;
+            color: #FFFFFF;
         }
 
         .button-row {
@@ -540,22 +499,6 @@
             font-weight: bold;
             color: #F5F5F5;
             margin-bottom: 32px;
-        }
-
-        .blocked-app-info {
-            margin-bottom: 32px;
-        }
-
-        .blocked-app-label {
-            font-size: 14px;
-            color: #999999;
-            margin-bottom: 12px;
-        }
-
-        .blocked-app-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #FFFFFF;
         }
 
         .reminder-message {
@@ -701,11 +644,10 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">BLOCKED APPS</label>
-                <div class="blocked-apps-list" id="blockedAppsList"></div>
-                <div class="app-add-row">
-                    <input type="text" id="newAppInput" placeholder="Add app name...">
-                    <button class="app-add-btn" onclick="addBlockedApp()">+</button>
+                <label class="form-label">SESSION</label>
+                <div class="session-toggle-row">
+                    <button class="session-toggle-btn" id="sessionOnBtn" onclick="setSessionActive(true)">SESSION ON</button>
+                    <button class="session-toggle-btn off" id="sessionOffBtn" onclick="setSessionActive(false)">SESSION OFF</button>
                 </div>
             </div>
 
@@ -727,11 +669,6 @@
         <div class="screen" id="reminderScreen">
             <div class="reminder-screen">
                 <div class="reminder-header">Stay Focused!</div>
-                
-                <div class="blocked-app-info">
-                    <div class="blocked-app-label">You tried to open:</div>
-                    <div class="blocked-app-name" id="reminderAppName">TikTok</div>
-                </div>
 
                 <div class="reminder-message" id="reminderMessageDisplay">
                     Your future is being built right now. Stay focused on your homework. It depends on it. Be disciplined!
@@ -783,7 +720,7 @@
         // Data storage
         let sessions = JSON.parse(localStorage.getItem('ontime_sessions')) || [];
         let currentEditingSession = null;
-        let blockedApps = [];
+        let currentSessionActive = true;
         
         // Time picker state
         let currentTimeField = null;
@@ -1230,13 +1167,7 @@
                     <div class="session-label">FOCUS SESSION</div>
                     <div class="session-time">${session.startTime} – ${session.endTime}</div>
                     <div class="session-title">${session.title}</div>
-                    ${Array.isArray(session.blockedApps) && session.blockedApps.length > 0 ? `
-                        <div class="session-apps">
-                            ${session.blockedApps.map(app => `
-                                <div class="app-chip">${app}</div>
-                            `).join('')}
-                        </div>
-                    ` : ''}
+                    <div class="session-note">${session.isActive === false ? 'Session Off' : 'Session On'}</div>
                 </div>
             `).join('');
         }
@@ -1254,8 +1185,6 @@
 
         function showEditScreen(index = null) {
             currentEditingSession = index;
-            blockedApps = [];
-            document.getElementById('newAppInput').value = '';
 
             if (index !== null) {
                 const session = sessions[index];
@@ -1264,8 +1193,8 @@
                 document.getElementById('startTimeDisplay').textContent = session.startTime;
                 document.getElementById('endTimeDisplay').textContent = session.endTime;
                 document.getElementById('sessionTitle').value = session.title;
-                document.getElementById('reminderMessage').value = session.reminderMessage;
-                blockedApps = [...session.blockedApps];
+                document.getElementById('reminderMessage').value = session.reminderMessage || '';
+                currentSessionActive = session.isActive !== false;
                 document.getElementById('deleteBtn').style.display = 'block';
             } else {
                 startTime = '05:00 PM';
@@ -1274,10 +1203,11 @@
                 document.getElementById('endTimeDisplay').textContent = '07:00 PM';
                 document.getElementById('sessionTitle').value = '';
                 document.getElementById('reminderMessage').value = '';
+                currentSessionActive = true;
                 document.getElementById('deleteBtn').style.display = 'none';
             }
 
-            renderBlockedApps();
+            updateSessionToggleUI();
             showScreen('editScreen');
         }
 
@@ -1285,42 +1215,26 @@
             showEditScreen(index);
         }
 
-        // Blocked apps
-        function renderBlockedApps() {
-            const list = document.getElementById('blockedAppsList');
-            list.innerHTML = blockedApps.map((app, index) => `
-                <div class="app-item">
-                    <div class="app-name">${app}</div>
-                    <button class="app-delete-btn" onclick="removeBlockedApp(${index})">✕</button>
-                </div>
-            `).join('');
+        function setSessionActive(isActive) {
+            currentSessionActive = isActive;
+            updateSessionToggleUI();
         }
 
-        function addBlockedApp() {
-            const input = document.getElementById('newAppInput');
-            const app = input.value.trim();
-            if (app && !blockedApps.includes(app)) {
-                blockedApps.push(app);
-                input.value = '';
-                renderBlockedApps();
+        function updateSessionToggleUI() {
+            const onBtn = document.getElementById('sessionOnBtn');
+            const offBtn = document.getElementById('sessionOffBtn');
+
+            if (currentSessionActive) {
+                onBtn.classList.add('active');
+                offBtn.classList.remove('active');
+            } else {
+                onBtn.classList.remove('active');
+                offBtn.classList.add('active');
             }
-        }
-
-        function removeBlockedApp(index) {
-            blockedApps.splice(index, 1);
-            renderBlockedApps();
         }
 
         // Save/Delete
         function saveSession() {
-            // Include any app still typed in the input before saving.
-            const pendingAppInput = document.getElementById('newAppInput');
-            const pendingApp = pendingAppInput.value.trim();
-            if (pendingApp && !blockedApps.includes(pendingApp)) {
-                blockedApps.push(pendingApp);
-                pendingAppInput.value = '';
-            }
-
             const title = document.getElementById('sessionTitle').value.trim();
             const reminderMessage = document.getElementById('reminderMessage').value.trim();
 
@@ -1343,7 +1257,7 @@
                 title,
                 startTime,
                 endTime,
-                blockedApps: [...blockedApps],
+                isActive: currentSessionActive,
                 reminderMessage
             };
 
@@ -1368,19 +1282,11 @@
         // Reminder screen
         function showReminder(sessionIndex) {
             const session = sessions[sessionIndex];
-            document.getElementById('reminderAppName').textContent = session.blockedApps[0] || 'App';
             document.getElementById('reminderMessageDisplay').textContent = session.reminderMessage;
             document.getElementById('reminderSessionTitle').textContent = `Focus Session: ${session.title}`;
             document.getElementById('reminderSessionTime').textContent = `${session.startTime} - ${session.endTime}`;
             showScreen('reminderScreen');
         }
-
-        // Allow Enter key in inputs
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('newAppInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') addBlockedApp();
-            });
-        });
 
         init();
     </script>

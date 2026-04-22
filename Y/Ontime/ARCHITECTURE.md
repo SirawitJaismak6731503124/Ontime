@@ -44,7 +44,7 @@ Notifications Layer (Separate Thread):
 │  FocusMonitorService            │
 │  • Monitors every 1 second      │
 │  • Checks UsageStatsManager     │
-│  • Matches blocked apps         │
+│  • Matches scheduled activities         │
 │  • Triggers notifications       │
 └────────────┬───────────────────┘
              │
@@ -70,7 +70,7 @@ FocusSession
 ├── title: String                 // Session name
 ├── startTime: String             // HH:mm format
 ├── endTime: String               // HH:mm format
-├── blockedApps: List<String>    // Package names
+├── activityList: List<String>    // Package names
 ├── reminderMessage: String       // Motivational text
 ├── createdAt: Timestamp?         // Firebase timestamp
 └── isActive: Boolean             // Active status
@@ -86,8 +86,8 @@ Local (Room)              Cloud (Firestore)
     │   ├─  title                │   │     id: <session_id>
     │   ├─  startTime            │   │     title: "..."
     │   ├─  endTime              │   │     startTime: "..."
-    │   ├─  blockedApps (CSV)    │   │     endTime: "..."
-    │   ├─  reminderMessage      │   │     blockedApps: [...]
+    │   ├─  activityList (CSV)    │   │     endTime: "..."
+    │   ├─  reminderMessage      │   │     activityList: [...]
     │   ├─  createdAt            │   │     reminderMessage: "..."
     │   └─  isActive             │   │     createdAt: timestamp
     │                             │   └─  }
@@ -111,7 +111,7 @@ Local (Room)              Cloud (Firestore)
            └─► Edit Session Screen
                ├─ Input title
                ├─ Set time
-               ├─ Add blocked apps
+               ├─ Add scheduled activities
                └─ Write message
                   │
                   └─► User taps "SAVE"
@@ -136,9 +136,9 @@ Local (Room)              Cloud (Firestore)
        ├─► Every 1 second:
        │   ├─ Get foreground app (UsageStatsManager)
        │   ├─ Query active sessions (Room)
-       │   └─ Check blocked apps list
+       │   └─ Check scheduled activities list
        │
-       └─► User opens blocked app
+       └─► User opens scheduled activity
            │
            └─► App package matches!
                │
@@ -201,7 +201,7 @@ App Launch
             │   │  │
             │   │  └─► For each session:
             │   │     │
-            │   │     └─► if (currentApp in blockedApps)
+            │   │     └─► if (currentApp in activityList)
             │   │         │
             │   │         └─► showInterruptionNotification()
             │   │
@@ -267,7 +267,7 @@ CREATE TABLE focus_sessions (
     title TEXT NOT NULL,
     startTime TEXT NOT NULL,
     endTime TEXT NOT NULL,
-    blockedApps TEXT,           -- Stored as CSV string
+    activityList TEXT,           -- Stored as CSV string
     reminderMessage TEXT,
     createdAt INTEGER,
     isActive INTEGER NOT NULL DEFAULT 1
@@ -286,7 +286,7 @@ focus_sessions (Collection)
 │   ├── title: "Homework"
 │   ├── startTime: "05:00 PM"
 │   ├── endTime: "07:00 PM"
-│   ├── blockedApps: ["com.tiktok.android", "com.instagram.android"]
+│   ├── activityList: ["com.tiktok.android", "com.instagram.android"]
 │   ├── reminderMessage: "Stay focused..."
 │   ├── createdAt: Timestamp(123456789)
 │   └── isActive: true
@@ -442,7 +442,7 @@ Every Second Check:
     │  └─ Current time within session?
     │
     ├─ ~1ms: String matching
-    │  └─ App in blocked list?
+    │  └─ App matches active session rules?
     │
     ├─ ~5ms: (if match) Create notification
     │  └─ Usually no notification

@@ -45,7 +45,7 @@ cd /workspaces/Ontime/Ontime
 
 ### 2️⃣ Get Interrupted (Intentionally)
 - Start your session
-- Open a blocked app
+- Open a scheduled activity
 - 📲 Notification appears
 - See your motivational reminder
 - Get back to work!
@@ -86,13 +86,13 @@ app/
 
 ### 📝 Edit Screen
 - Time block selector
-- Blocked apps manager
+- Scheduled activities manager
 - Reminder message composer
 - Save/Delete buttons
 
 ### 🔔 Reminder View
 - Full-screen motivational message
-- Shows blocked app name
+- Shows scheduled activity name
 - "Got it! Let's focus" button
 
 ### 🔄 Sync
@@ -115,7 +115,7 @@ app/
 ### Debug Foreground App Detection
 ```kotlin
 // Add logging in FocusMonitorService
-Log.d("ForegroundApp", "Current: $currentApp, Blocked: ${session.blockedApps}")
+Log.d("ForegroundApp", "Current: $currentApp, Blocked: ${session.activityList}")
 ```
 
 ### Test Database
@@ -156,7 +156,7 @@ Log.d("ForegroundApp", "Current: $currentApp, Blocked: ${session.blockedApps}")
 - [ ] Can see session in dashboard
 - [ ] Session appears in Firebase Firestore
 - [ ] Service starts on app launch
-- [ ] Notification appears when blocked app opens
+- [ ] Notification appears when scheduled activity opens
 
 ---
 

@@ -11,7 +11,7 @@ A powerful Android app that helps students stay focused by monitoring their scre
 
 🔔 **Smart Interruption System**
 - Real-time monitoring of foreground apps
-- High-priority notifications when blocked apps are opened
+- High-priority notifications when scheduled activities are opened
 - Full-screen reminder display with motivational messages
 
 💾 **Offline-First Architecture**
@@ -31,7 +31,7 @@ A powerful Android app that helps students stay focused by monitoring their scre
 - **Design System**: Deep black theme with high contrast
 - **Screens**:
   - Dashboard: List of all focus sessions
-  - Edit Session: Create/modify sessions with blocked apps and reminders
+  - Edit Session: Create/modify sessions with scheduled activities and reminders
   - Reminder: Full-screen motivational display
 
 ### Business Logic
@@ -135,7 +135,7 @@ On your Android device:
 ### During a Focus Session
 
 - The app monitors your screen in the background
-- If you open a blocked app, you'll receive a notification
+- If you open a scheduled activity, you'll receive a notification
 - Tapping the notification shows your motivational message
 - This keeps you accountable and focused
 
@@ -148,7 +148,7 @@ data class FocusSession(
     val title: String,
     val startTime: String,
     val endTime: String,
-    val blockedApps: List<String>,
+    val activityList: List<String>,
     val reminderMessage: String,
     val createdAt: Timestamp?,
     val isActive: Boolean

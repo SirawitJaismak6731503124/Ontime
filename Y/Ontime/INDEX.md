@@ -144,20 +144,20 @@ app/
 
 #### 📱 Dashboard Screen
 - View all focus sessions
-- Session cards with time, title, blocked apps
+- Session cards with time, title, scheduled activities
 - Create new session button
 - Click to edit
 
 #### 📝 Edit Session Screen
 - Set start/end time
 - Add session title
-- Manage blocked apps (add/remove)
+- Manage scheduled activities (add/remove)
 - Write motivational message
 - Save or delete session
 
 #### 🔔 Reminder Screen
 - Full-screen motivational message
-- Shows blocked app name
+- Shows scheduled activity name
 - Session details
 - Dismiss button
 
@@ -166,11 +166,11 @@ app/
 #### 👀 App Monitoring
 - Checks foreground app every 1 second
 - Queries active sessions for current time
-- Matches against blocked apps list
+- Matches against scheduled activities list
 
 #### 🔔 Notifications
 - High-priority heads-up notification
-- Shows when blocked app opens
+- Shows when scheduled activity opens
 - Tapping brings app to foreground
 - Navigation to reminder screen
 
@@ -320,8 +320,8 @@ app/
 
 ### Background Monitoring
 - [ ] Create session for current time
-- [ ] Add a blocked app
-- [ ] Open blocked app
+- [ ] Add a scheduled activity
+- [ ] Open scheduled activity
 - [ ] Notification appears
 - [ ] Tap notification
 - [ ] Reminder screen shows

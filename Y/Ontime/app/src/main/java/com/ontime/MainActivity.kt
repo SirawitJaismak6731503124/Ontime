@@ -75,7 +75,11 @@ class MainActivity : ComponentActivity() {
                                 session = currentSession,
                                 onSave = { session ->
                                     viewModel.saveSession(session)
-                                    AlarmScheduler.scheduleReminder(this@MainActivity, session)
+                                    if (session.isActive) {
+                                        AlarmScheduler.scheduleReminder(this@MainActivity, session)
+                                    } else {
+                                        AlarmScheduler.cancelReminder(this@MainActivity, session.id)
+                                    }
                                     viewModel.clearCurrentSession()
                                 },
                                 onDelete = { session ->
